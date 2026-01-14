@@ -1,0 +1,40 @@
+[tool.poetry]
+name = "calculus-with-python"
+version = "0.1.0"
+description = "Teach plotting functions in Python plus numerical differentiation and integration."
+authors = ["Diogo <you@example.com>"]
+readme = "README.md"
+packages = [{ include = "calculus_with_python", from = "src" }]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = ">=3.10,<4.0"
+numpy = ">=1.24"
+matplotlib = ">=3.7"
+
+# Optional: for symbolic ground truth comparisons in notebooks (not required by the core package).
+sympy = { version = ">=1.12", optional = true }
+
+[tool.poetry.extras]
+symbolic = ["sympy"]
+
+[tool.poetry.group.dev.dependencies]
+pytest = ">=7.4"
+ruff = ">=0.2"
+mypy = ">=1.7"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_any_generics = true
+no_implicit_optional = true
+check_untyped_defs = true
