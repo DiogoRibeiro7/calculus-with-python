@@ -28,6 +28,8 @@ def difference_quotient(
     h: float = 1e-5,
     method: Method = "central",
 ) -> float: ...
+
+
 @overload
 def difference_quotient(
     f: Callable[..., object],
