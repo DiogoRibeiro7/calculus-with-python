@@ -22,6 +22,7 @@ symbolic = ["sympy"]
 pytest = ">=7.4"
 ruff = ">=0.2"
 mypy = ">=1.7"
+nbformat = ">=5.9"
 
 [tool.poetry.scripts]
 calcwithpy = "calculus_with_python.cli:main"
