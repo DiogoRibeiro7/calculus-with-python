@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from typing import Callable, Literal, Union, overload
+from typing import Literal, Union, overload
 
 import numpy as np
 import numpy.typing as npt
 
-from .grids import safe_eval
+from .grids import Function, safe_eval
 
 FloatArray = npt.NDArray[np.floating]
 Method = Literal["forward", "backward", "central"]
@@ -20,9 +20,19 @@ def _as_1d_float_array(x: Union[float, FloatArray]) -> FloatArray:
     return x_arr
 
 
+def _ensure_inputs(x_arr: FloatArray, h: float) -> None:
+    if not np.all(np.isfinite(x_arr)):
+        raise ValueError("x must be finite.")
+    if not np.isfinite(h) or h <= 0:
+        raise ValueError("h must be a finite positive number.")
+    # Check for h below float64 precision at x.
+    if np.any((x_arr + h) == x_arr) or np.any((x_arr - h) == x_arr):
+        raise ValueError("h is too small for float64 precision at the provided x.")
+
+
 @overload
 def difference_quotient(
-    f: Callable[..., object],
+    f: Function,
     x: float,
     *,
     h: float = 1e-5,
@@ -32,7 +42,7 @@ def difference_quotient(
 
 @overload
 def difference_quotient(
-    f: Callable[..., object],
+    f: Function,
     x: FloatArray,
     *,
     h: float = 1e-5,
@@ -41,7 +51,7 @@ def difference_quotient(
 
 
 def difference_quotient(
-    f: Callable[..., object],
+    f: Function,
     x: Union[float, FloatArray],
     *,
     h: float = 1e-5,
@@ -54,6 +64,7 @@ def difference_quotient(
         raise ValueError("h must be a positive finite number.")
 
     x_arr = _as_1d_float_array(x)
+    _ensure_inputs(x_arr, h)
 
     if method == "forward":
         y1 = safe_eval(f, x_arr + h)
@@ -75,8 +86,48 @@ def difference_quotient(
     return out
 
 
+@overload
+def second_derivative(
+    f: Function,
+    x: float,
+    *,
+    h: float = 1e-4,
+) -> float: ...
+
+
+@overload
+def second_derivative(
+    f: Function,
+    x: FloatArray,
+    *,
+    h: float = 1e-4,
+) -> FloatArray: ...
+
+
+def second_derivative(
+    f: Function,
+    x: Union[float, FloatArray],
+    *,
+    h: float = 1e-4,
+) -> Union[float, FloatArray]:
+    """
+    Approximate the second derivative using central differences.
+    """
+    x_arr = _as_1d_float_array(x)
+    _ensure_inputs(x_arr, h)
+
+    y0 = safe_eval(f, x_arr)
+    y_ph = safe_eval(f, x_arr + h)
+    y_mh = safe_eval(f, x_arr - h)
+    out = (y_ph - 2.0 * y0 + y_mh) / (h * h)
+
+    if np.asarray(x).ndim == 0:
+        return float(out[0])
+    return out
+
+
 def derivative(
-    f: Callable[..., object],
+    f: Function,
     x: Union[float, FloatArray],
     *,
     h: float = 1e-5,

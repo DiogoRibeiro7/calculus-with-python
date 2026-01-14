@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from typing import Callable, Literal
+from typing import Literal
 
 import numpy as np
 import numpy.typing as npt
 
-from .grids import make_grid, safe_eval
+from .grids import Function, make_grid, safe_eval
 
 FloatArray = npt.NDArray[np.floating]
 RiemannSide = Literal["left", "right", "midpoint"]
@@ -66,7 +66,7 @@ def simpson(y: FloatArray, x: FloatArray, *, rtol: float = 1e-8, atol: float = 1
 
 
 def integrate_f(
-    f: Callable[..., object],
+    f: Function,
     a: float,
     b: float,
     *,

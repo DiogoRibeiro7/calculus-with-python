@@ -8,7 +8,7 @@ packages = [{ include = "calculus_with_python", from = "src" }]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = ">=3.10,<4.0"
+python = ">=3.11,<3.13"
 numpy = ">=1.24"
 matplotlib = ">=3.7"
 
@@ -23,15 +23,18 @@ pytest = ">=7.4"
 ruff = ">=0.2"
 mypy = ">=1.7"
 
+[tool.poetry.scripts]
+calcwithpy = "calculus_with_python.cli:main"
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
 [tool.ruff]
 line-length = 100
-target-version = "py310"
+target-version = "py311"
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.11"
 strict = true
 warn_return_any = true
 warn_unused_configs = true

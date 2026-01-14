@@ -1,11 +1,14 @@
 from __future__ import annotations
 
-from typing import Callable, overload
+from typing import Callable, overload, cast
 
 import numpy as np
 import numpy.typing as npt
 
 FloatArray = npt.NDArray[np.floating]
+VectorFunction = Callable[[FloatArray], FloatArray]
+ScalarFunction = Callable[[float], float]
+Function = ScalarFunction | VectorFunction
 
 
 def make_grid(
@@ -49,12 +52,12 @@ def make_grid(
 
 
 @overload
-def safe_eval(f: Callable[[FloatArray], FloatArray], x: FloatArray) -> FloatArray: ...
+def safe_eval(f: VectorFunction, x: FloatArray) -> FloatArray: ...
 @overload
-def safe_eval(f: Callable[[float], float], x: FloatArray) -> FloatArray: ...
+def safe_eval(f: ScalarFunction, x: FloatArray) -> FloatArray: ...
 
 
-def safe_eval(f: Callable[..., object], x: FloatArray) -> FloatArray:
+def safe_eval(f: VectorFunction | ScalarFunction, x: FloatArray) -> FloatArray:
     """
     Evaluate a function on a numpy grid.
 
@@ -77,7 +80,7 @@ def safe_eval(f: Callable[..., object], x: FloatArray) -> FloatArray:
 
     # 1) Try vectorized evaluation
     try:
-        y = f(x_arr)  # type: ignore[misc]
+        y = cast(VectorFunction, f)(x_arr)
         y_arr = np.asarray(y, dtype=np.float64)
         if y_arr.shape != x_arr.shape:
             raise ValueError("Function output shape does not match input shape.")
@@ -87,7 +90,8 @@ def safe_eval(f: Callable[..., object], x: FloatArray) -> FloatArray:
 
     # 2) Fallback: scalar evaluation
     try:
-        vf = np.vectorize(lambda t: float(f(float(t))))  # type: ignore[arg-type]
+        scalar_func = cast(ScalarFunction, f)
+        vf = np.vectorize(lambda t: float(scalar_func(float(t))))
         y_arr2 = np.asarray(vf(x_arr), dtype=np.float64)
         if y_arr2.shape != x_arr.shape:
             raise ValueError("Vectorized output shape does not match input shape.")

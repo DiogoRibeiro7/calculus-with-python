@@ -1,17 +1,17 @@
 from __future__ import annotations
 
-from typing import Callable, Mapping, Optional
+from typing import Mapping, Optional
 
 import numpy as np
 import numpy.typing as npt
 
-from .grids import safe_eval
+from .grids import Function, safe_eval
 
 FloatArray = npt.NDArray[np.floating]
 
 
 def plot_function(
-    f: Callable[..., object],
+    f: Function,
     x: FloatArray,
     *,
     ax: Optional[object] = None,
@@ -65,7 +65,7 @@ def plot_function(
 
 
 def plot_many(
-    functions: Mapping[str, Callable[..., object]],
+    functions: Mapping[str, Function],
     x: FloatArray,
     *,
     ax: Optional[object] = None,
